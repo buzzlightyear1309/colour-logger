@@ -16,6 +16,7 @@ class ColourLogger
     protected Logger $logger;
     protected string $format;
     protected array $styles = [];
+    protected bool $json_pretty = false;
     protected array $colour_map = [
         'black' => '0',
         'red' => '1',
@@ -167,26 +168,65 @@ class ColourLogger
         return $this;
     }
 
+    public static function json(bool $pretty = true): ColourLogger
+    {
+        return self::getInstance()->setJsonPretty($pretty);
+    }
+
+    protected function setJsonPretty(bool $pretty): static
+    {
+        $this->json_pretty = $pretty;
+        return $this;
+    }
+
     /**
      * Log a message with styles applied.
      * @param string $message The message to log.
      * @param array $context Additional information for the log.
      * @return ColourLogger
      */
-    public static function log(string $message, array $context = []): ColourLogger
+    public static function log($message, array $context = []): ColourLogger
     {
         return self::getInstance()->executeLog($message, $context);
     }
 
     protected function executeLog($message, array $context = []): static
     {
-        $this->applyFormat();
-        $this->logger->info($message, $context);
+        $formatted_message = $this->formatMessage($message);
+        $this->applyStyle();
+        $this->logger->info($formatted_message, $context);
         $this->styles = []; // Reset styles after logging
+        $this->json_pretty = false; // Reset JSON pretty print to default
         return $this;
     }
 
-    protected function applyFormat(): void
+    protected function formatMessage($message): string
+    {
+        if (is_null($message)) {
+            return 'null';
+        }
+
+        if (is_bool($message)) {
+            return $message ? 'true' : 'false';
+        }
+
+        if (is_array($message) || is_object($message)) {
+            $json_options = JSON_THROW_ON_ERROR;
+            if ($this->json_pretty) {
+                $json_options |= JSON_PRETTY_PRINT;
+            }
+
+            try {
+                return json_encode($message, $json_options);
+            } catch (\JsonException $e) {
+                return 'Error encoding message: ' . $e->getMessage();
+            }
+        }
+
+        return (string) $message;
+    }
+
+    protected function applyStyle(): void
     {
         if (!empty($this->styles)) {
             $styleCode = implode(';', $this->styles);

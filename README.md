@@ -7,6 +7,7 @@ ColourLogger is a powerful, fluent API for coloured logging in PHP applications,
 - Easy integration with any Laravel application.
 - Fluent interface to configure foreground and background colours, as well as text styles such as bold, italic, and underline.
 - Built on top of the robust Monolog logging library.
+- Support for logging complex data types including arrays and objects, with optional pretty-print JSON formatting.
 
 ## Installation
 
@@ -28,6 +29,9 @@ ColourLogger::text('blue')->log('This is a blue text');
 
 // Complex styling
 ColourLogger::text('blue')->background('red')->bold()->italic()->underline()->log('This message has red background and blue, bold, italic, underlined text');
+
+// Logging complex data types with pretty-print JSON
+ColourLogger::text('green')->json()->log(['key' => 'value', 'another_key' => 'another_value']);
 ```
 
 ## Customize Colours
@@ -52,7 +56,5 @@ To contribute to ColourLogger, follow these steps:
 Distributed under the MIT License. See `LICENSE` file for more information.
 
 ## Contact
-
-Daniel - danielschreiber1309@gmail.com
 
 Project Link: [https://github.com/buzzlightyear1309/colour-logger](https://github.com/buzzlightyear1309/colour-logger)
